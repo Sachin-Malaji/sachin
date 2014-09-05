@@ -1,0 +1,153 @@
+CREATE TABLE ProductVersion (
+GUID  nvarchar(256) NOT NULL,
+
+ productID nvarchar(50) NOT NULL,
+
+ productVersion nvarchar(50) NOT NULL,
+
+ displayName nvarchar(256) NOT NULL,
+
+ description nvarchar(4000), 
+
+documentationURL nvarchar(512), 
+
+ECCN nvarchar(10),
+
+ releaseDate date, 
+
+maintenanceDate date,
+
+checkAction nvarchar(4000), 
+
+PRIMARY KEY (GUID));
+
+
+
+
+
+
+
+
+
+
+
+
+CREATE TABLE ProductComponent (
+
+GUID  nvarchar(256) NOT NULL,
+
+ productID nvarchar(50) NOT NULL,
+
+ productVersion nvarchar(50) NOT NULL,
+
+ componentID nvarchar(50) NOT NULL,
+
+ componentVersion nvarchar(50) NOT NULL,
+
+displayName nvarchar(256),
+
+ description nvarchar(4000), 
+
+isOptional bit NOT NULL,
+
+ functionalGroup nvarchar(50) NOT NULL, 
+
+checkAction nvarchar(4000),
+
+ installationOrder smallint DEFAULT ((0)) NOT NULL,
+
+PRIMARY KEY (GUID),
+
+CONSTRAINT FK_ProductComponent_ProductVersion FOREIGN KEY (productID, productVersion) REFERENCES ProductVersion (productID, productVersion) ON UPDATE CASCADE ON DELETE CASCADE);
+
+
+
+
+
+
+
+
+
+
+
+
+CREATE TABLE ProductBinary (
+
+GUID  nvarchar(256) NOT NULL,
+
+ productID nvarchar(50) NOT NULL, 
+
+productVersion nvarchar(50) NOT NULL, 
+
+componentID nvarchar(50) NOT NULL,
+
+ platformID nvarchar(50) NOT NULL,
+
+displayName nvarchar(256) NOT NULL, 
+
+description nvarchar(4000), 
+
+downloadURL nvarchar(512),
+
+ installAction nvarchar(50), 
+
+precheckAction nvarchar(50), 
+
+verifyAction nvarchar(50),
+
+PRIMARY KEY (GUID)
+
+,CONSTRAINT FK_ProductBinary_ProductComponent FOREIGN KEY (productID, productVersion, componentID) REFERENCES ProductComponent (productID, productVersion, componentID) ON UPDATE CASCADE ON DELETE CASCADE);
+
+
+
+
+
+
+
+
+
+
+
+
+CREATE TABLE DependencyProductForBinary (
+
+ Binary_GUID nvarchar(256) NOT NULL, 
+
+DependencyProduct_GUID  nvarchar(256) NOT NULL, 
+
+isLocal bit NOT NULL,
+
+ isOptional bit NOT NULL,
+
+ manufacturer  VARCHAR(256) NOT NULL,
+
+ PRIMARY KEY (Binary_GUID,DependencyProduct_GUID),
+
+ CONSTRAINT FK_ProductBinary FOREIGN KEY (Binary_GUID) REFERENCES ProductBinary(GUID) ON UPDATE CASCADE ON DELETE CASCADE, CONSTRAINT FK_DependencyProduct FOREIGN KEY (DependencyProduct_GUID) REFERENCES ProductVersion(GUID) ON UPDATE CASCADE ON DELETE CASCADE);
+
+
+
+
+
+
+
+
+
+
+
+
+CREATE TABLE DependencyComponentForBinary (
+
+ Binary_GUID nvarchar(256) NOT NULL,
+
+ DependencyComponent_GUID  nvarchar(256) NOT NULL,
+
+ isLocal bit NOT NULL, 
+
+isOptional bit NOT NULL, 
+
+PRIMARY KEY (Binary_GUID,DependencyComponent_GUID), 
+
+CONSTRAINT FK_ProductBinary FOREIGN KEY (Binary_GUID) REFERENCES ProductBinary(GUID) ON UPDATE CASCADE ON DELETE CASCADE, CONSTRAINT FK_DependencyComponent FOREIGN KEY (DependencyComponent_GUID) REFERENCES ProductComponent(GUID) ON UPDATE CASCADE ON DELETE CASCADE);
+
